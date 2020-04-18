@@ -1,0 +1,71 @@
+/*
+    Author: Thinh Tran
+    Date: Feb 23, 2020    
+*/
+#header {
+    height: 80px;
+    background: lightskyblue;
+    border-bottom: 10px solid blue;
+    
+}
+#header h1{
+    color: orangered;
+    padding-left: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin: 0;
+}
+
+#menu {
+    height: 40px;
+    background: lightsteelblue;
+}
+
+#menu a{
+    display: inline-block;
+    padding-right: 30px;
+    padding-left: 30px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border: 1px solid blue;
+}
+
+#container {
+    width: 1000px;
+    margin:20px auto 20px auto;
+    border: 1px solid black;
+}
+
+#content {
+    padding: 10px;
+}
+
+#poster {
+    padding-left: 200px;
+    padding-right: 100px;
+}
+#footer {
+    clear: both;
+    background-color: blue;
+    color: white;
+    text-align: center;
+    font-size: 12pt;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+#event {
+    width: 600px;
+    margin-left: 20px;
+    border: 1px solid black;
+    padding: 10px;
+    background: wheat;
+}
+
+#event h3{
+    background-color: tomato;
+    text-align: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-top: 0;
+}
