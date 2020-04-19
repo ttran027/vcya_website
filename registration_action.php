@@ -4,6 +4,10 @@
         $comment = "True"?>
 <?php
 session_start();
+if(!isset($_POST['register-submit'])){
+    header("Location: registration.php");
+    exit();
+}
 session_unset();
 $firstname = $_POST['firstname'];
 $lastname = $_POST['lastname'];
@@ -16,6 +20,7 @@ $fluency = $_POST['fluency'];
 $update = $_POST['update'];
 $error = FALSE;
 $messages= "";
+$db = new SQLite3('vcya.db');
 
 if(empty($firstname) || empty($lastname) || preg_match('/[0-9]{1}$/',$firstname) || preg_match('/[0-9]{1}$/',$lastname)){
     $error =TRUE;
@@ -30,6 +35,18 @@ if(empty($email) || !preg_match('/^.+@.+$/', $email)){
 if(empty($userid) || preg_match('/\s/',$userid) || strlen($userid) < 3){
     $error = TRUE;
     $messages .= "User ID is missing or invalid. It must not contain whitespaces and must be at least 3 characters.\n";
+}else {
+    $stmt = $db->prepare('select * from users where userID=:id');
+    $stmt->bindValue(':id', $userid, SQLITE3_TEXT);
+    $result= $stmt->execute();
+    $rows = 0 ;
+    while ($result->fetchArray(SQLITE3_ASSOC)) {
+        $rows++;
+    }
+    if($rows > 0){
+        $error = TRUE;
+        $messages .= "User ID is already used.\n";
+    }
 }
 
 if ($password != $confirm) {
@@ -57,20 +74,21 @@ if(empty($update)){
     $messages .= "Invalid update choice.";
 }
 
+
+
 if(!$error){
+    $hash = password_hash($password, PASSWORD_DEFAULT);
     $_SESSION["message"] = "Congratulations ".$firstname."! You have successfully registered. Your User ID is ".$userid;
-    $fileout = fopen('/home/ttr/secure_html/cs312/project/registration.txt','a')
-                or die("error: unable to open output file");
-    $output = str_replace(',','-',$firstname).','.
-              str_replace(',','-',$lastname).','.
-              str_replace(',','-',$userid).','.
-              str_replace(',','-',$password).','.
-              str_replace(',','-',$email).','.
-              str_replace(',','-',$how).','.
-              str_replace(',','-',$fluency).','.
-              str_replace(',','-',$update)."\n";
-    fwrite($fileout, $output);
-    fclose($fileout); 
+    $stmt = $db->prepare('insert into users(userId,firstname,lastname,email,userPassword,referral,vietFluency,emailSubscription) values(:id,:fn,:ln,:email,:pass,:refer,:viet,:sub)');
+    $stmt->bindValue(':id', $userid, SQLITE3_TEXT);
+    $stmt->bindValue(':fn', $firstname, SQLITE3_TEXT);
+    $stmt->bindValue(':ln', $lastname, SQLITE3_TEXT);
+    $stmt->bindValue(':email', $email, SQLITE3_TEXT);
+    $stmt->bindValue(':pass', $hash, SQLITE3_TEXT);
+    $stmt->bindValue(':refer', $how, SQLITE3_TEXT);
+    $stmt->bindValue(':viet', $fluency, SQLITE3_TEXT);
+    $stmt->bindValue(':sub', $update);
+    $stmt->execute();
     header("Location: index.php");          
 }else
 {

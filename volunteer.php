@@ -1,7 +1,10 @@
 <?php /*  Name: Thinh Tran
           Date: Feb 23, 2020    
       */
-        $comment = "True"?>    
+        $comment = "True"?>
+<?php
+    session_start();
+?>    
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>

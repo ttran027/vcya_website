@@ -1,7 +1,10 @@
 <?php /*  Name: Thinh Tran
           Date: Feb 23, 2020    
       */
-        $comment = "True"?>   
+        $comment = "True"?>
+<?php
+    session_start();
+?>   
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
@@ -14,25 +17,38 @@
 <div id="container">
     <?php require 'header.php'; ?>
     <?php require 'menu.php';?>
-    <div>
-    <h1><a href="new_event.php">Add New Event</a></h1>
-    </div>
+    <?php
+        if(isset($_SESSION['userid']) && isset($_SESSION['logged_in']) ){
+            if($_SESSION['logged_in'] == TRUE){
+                echo '<div>
+                <h1><a href="new_event.php">Add New Event</a></h1>
+                </div>';
+            }else {
+                session_unset();
+            }      
+        }    
+    ?>
     <div id="content">
         <?php
-            $file = fopen("events.txt","r");
-            while(! feof($file)){
-                $line = fgets($file);
-                if(strlen($line) > 1){
-                $arr = preg_split ("/\|/", $line);
-                $content = $arr;
+            $db = new SQLite3('vcya.db');
+            $stmt = $db->prepare('delete from events where eventDate < :date');
+            $today = new DateTime();
+            $stmt->bindValue(':date',$today->getTimestamp());
+            $stmt->execute();
+            $stmt = $db->prepare('select * from events order by eventDate ASC');
+            $result= $stmt->execute();
+            while ($event = $result->fetchArray(SQLITE3_ASSOC)) {
+                $date = new DateTime();
+                $date->setTimestamp($event['eventDate']);
                 echo '<div id="event">
-                      <h3>'.$arr[2].'</h3>
-                      <p>Date: '.$arr[0].'</p>
-                      <p>Time: '.$arr[1].'</p>
-                      <p>Sponsored by: '.$arr[3].'</p>
-                     <p>Description: '.$arr[4].'</p></div>';
-                }
-            }   
+                      <h3>'.$event['eventName'].'</h3>
+                      <p>Date: '.$date->format('Y-m-d').'</p>
+                      <p>Time: '.$event['eventTime'].'</p>
+                      <p>Sponsored by: '.$event['eventSponsor'].'</p>
+                     <p>Description: '.$event['eventDescription'].'</p></div>';
+                
+            }
+ 
            
         ?>
     </div>

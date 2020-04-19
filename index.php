@@ -30,9 +30,6 @@
 <div id="container">
     <?php require 'header.php'; ?>
     <?php require 'menu.php';?>
-    <div>
-    <h1><a href="registration.php">Register here!!!</a></h1>
-    </div>
     <div id ="row">
         <div id="column">
             <div>
@@ -48,7 +45,7 @@
                             echo '<h3 style="color:red;">';
                             echo($_SESSION["message"]);
                             echo '</h3>';           
-                            session_unset();
+                            unset($_SESSION["message"]);
                         }   
                     ?>    
         </div>

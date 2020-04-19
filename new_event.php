@@ -3,7 +3,14 @@
       */
         $comment = "True"?>
 <?php
-    session_start();    
+    session_start();
+    if(!isset($_SESSION['userid']) || !isset($_SESSION['logged_in']) ){
+        if($_SESSION['logged_in'] == TRUE){
+            session_unset();
+        }
+        header("Location: login.php");
+        exit();     
+    }     
 ?>
 
 <!DOCTYPE html>
@@ -29,32 +36,20 @@
         function checkForm() {
            
             //Store the password field objects into variables ...
-            var date  = document.getElementById('date').value;
+            var dateformat  = document.getElementById('date').value;
             var message = document.getElementById('date-message');
+            var today = new Date();
+            var date = new Date(dateformat.toString());
             var content = null;;
             message.style.color           = "#ff6666";
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.open("GET", "events.txt", false);
-            xmlhttp.send();
-            content = xmlhttp.responseText;
-            var str = content.toString();
-            var lines = str.split("\n");            
-            var txt = "";
-            var check = true;
-            lines.forEach(checkDate); 
-            message.innerHTML = txt;
             
-            return check;
-            
-            function checkDate(value){
-                pos = value.indexOf("|");
-                if(pos > -1){
-                    if(date.toString() == value.substring(0,pos)){
-                        check = false;
-                        txt = "There is already an event on this date! Please choose another date.";
-                    }
-                }         
+            if(date.getTime() < today.getTime()){
+                message.innerHTML = "Please only select a future date from today!";
+                return false;
             }
+          
+            return true;
+                      
         }
         
         </script>   
@@ -78,7 +73,7 @@
                         <br><span id="date-message" class="date-message"></span><br>
                         Time:<br>
                         <input type="time" name="time" id="time"><br>
-                        <input type="submit" value="Submit">
+                        <button type="submit" name="addevent-submit" value="addevent">Submit</button>
                     </form>
                 </div>
                 <div class="column">
@@ -87,7 +82,7 @@
                             echo '<h3 style="color:red;">';
                             echo($_SESSION["message"]);
                             echo '</h3>';           
-                            session_unset();
+                            unset($_SESSION['message']);
                         }  
                     ?>
                 </div>

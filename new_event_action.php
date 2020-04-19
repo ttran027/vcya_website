@@ -4,15 +4,20 @@
         $comment = "True"?>
 <?php
 session_start();
-session_unset();
+if(!isset($_POST['addevent-submit'])){
+    header("Location: new_event.php");
+    exit();
+}
 $name = $_POST['name'];
 $sponsor = $_POST['sponsor'];
 $description = $_POST['description'];
-$date = $_POST['date'];
+$dateformat = $_POST['date'];
+$datetime = new DateTime($dateformat);
+$date = $datetime->getTimestamp();
 $time = $_POST['time'];
 $error = FALSE;
 $messages= "";
-
+$db = new SQLite3('vcya.db');
 if(empty($name)){
     $error =TRUE;
     $messages .= "The name of the event must not be empty.\n";
@@ -28,14 +33,21 @@ if(empty($description)){
     $messages .= "The description of the event must not be empty.\n";
 }
 
-if ($password != $confirm) {
-    $error = TRUE;
-    $messages .= "Passwords do not match.\n";
-}
-
 if( empty($date)){
     $error = TRUE;
     $messages .= "The date is invalid.\n";
+}else {
+    $stmt = $db->prepare('select * from events where eventDate=:date');
+    $stmt->bindValue(':date', $date);
+    $result= $stmt->execute();
+    $rows = 0 ;
+    while ($result->fetchArray(SQLITE3_ASSOC)) {
+        $rows++;
+    }
+    if($rows > 0){
+        $error = TRUE;
+        $messages .= "There is already an event on ".$dateformat.". Please select a different date!\n";
+    }
 }
 
 if(empty($time)){
@@ -44,16 +56,14 @@ if(empty($time)){
 }
 
 if(!$error){
-    $_SESSION["message"] = "New event ".$name." sponsored by ".$sponsor." on ".$date." at ".$time." have been successfully added!";
-    $fileout = fopen('/home/ttr/secure_html/cs312/project/events.txt','a')
-                or die("error: unable to open output file");
-    $output = str_replace(',','-',$date).'|'.
-              str_replace(',','-',$time).'|'.
-              str_replace(',','-',$name).'|'.
-              str_replace(',','-',$sponsor).'|'.
-              str_replace(',','-',$description)."\n";
-    fwrite($fileout, $output);
-    fclose($fileout); 
+    $stmt = $db->prepare('insert into events(eventName,eventSponsor,eventDate,eventTime,eventDescription) values(:name,:sponsor,:date,:time,:des)');
+    $stmt->bindValue(':name', $name, SQLITE3_TEXT);
+    $stmt->bindValue(':sponsor', $sponsor, SQLITE3_TEXT);
+    $stmt->bindValue(':date', $date);
+    $stmt->bindValue(':time', $time);
+    $stmt->bindValue(':des', $description, SQLITE3_TEXT);
+    $stmt->execute();
+    $_SESSION["message"] = "New event ".$name." sponsored by ".$sponsor." on ".$dateformat." at ".$time." have been successfully added!";
     header("Location: index.php");          
 }else
 {

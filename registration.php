@@ -3,7 +3,16 @@
       */
         $comment = "True"?>
 <?php
-    session_start();    
+    session_start();
+    if(isset($_SESSION['userid']) && isset($_SESSION['logged_in'])){
+        if ($_SESSION['logged_in'] == TRUE) {
+            $_SESSION['message'] = "You are currently logged in. Please log out then register again!";
+            header("Location: index.php?alreadyloggedin");
+            exit();
+        }else {
+            session_unset();
+        }
+    }
 ?>
 
 <!DOCTYPE html>
@@ -117,7 +126,7 @@
                             <option value="don't">No</option>
                         </select>
                         <br>
-                        <input type="submit" value="Submit">
+                        <button type="submit" name="register-submit" value="register">Submit</button>
                     </form>
                 </div>
                 <div class="column">
